@@ -1,0 +1,24 @@
+{
+  "name": "DriverGuard DMS - Detecção de Sono",
+  "short_name": "DriverGuard",
+  "description": "Monitor Automotivo Inteligente de Fadiga e Sono ao Volante",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "orientation": "any",
+  "background_color": "#070b14",
+  "theme_color": "#070b14",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' rx='40' fill='%230a1120'/><circle cx='96' cy='96' r='68' fill='none' stroke='%2300e5ff' stroke-width='10'/><path d='M60 90 Q96 60 132 90 Q96 120 60 90' fill='none' stroke='%2300e5ff' stroke-width='8'/><circle cx='96' cy='90' r='14' fill='%23ff1744'/></svg>",
+      "sizes": "192x192",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='100' fill='%230a1120'/><circle cx='256' cy='256' r='180' fill='none' stroke='%2300e5ff' stroke-width='24'/><path d='M160 240 Q256 160 352 240 Q256 320 160 240' fill='none' stroke='%2300e5ff' stroke-width='20'/><circle cx='256' cy='240' r='36' fill='%23ff1744'/></svg>",
+      "sizes": "512x512",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

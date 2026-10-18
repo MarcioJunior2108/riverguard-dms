@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>DriverGuard DMS - Monitoramento Veicular Mobile</title>
+  <meta name="description" content="Sistema Automotivo Inteligente de Detecção de Fadiga e Sono ao Volante em Tempo Real para Smartphones e Web.">
+  <meta name="theme-color" content="#070c16">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><circle cx='50' cy='50' r='46' fill='%230a1120' stroke='%2300e5ff' stroke-width='6'/><path d='M30 45 Q50 30 70 45 Q50 60 30 45' fill='none' stroke='%2300e5ff' stroke-width='5'/><circle cx='50' cy='45' r='7' fill='%23ff1744'/></svg>">
+  
+  <!-- Fontes de Alta Fidelidade -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="app-container" class="app-container">
+    <!-- Moldura de Emergência (Flashing Vermelho) -->
+    <div id="alarm-border" class="alarm-border"></div>
+
+    <!-- Câmera e Canvas HUD -->
+    <div class="viewport-wrapper">
+      <video id="webcam" playsinline autoplay muted></video>
+      <canvas id="hud-canvas"></canvas>
+
+      <!-- Splash de Inicialização / Permissão de Câmera -->
+      <div id="start-overlay" class="start-overlay">
+        <div class="start-card">
+          <div class="brand-badge">
+            <span class="brand-dot"></span> DRIVERGUARD DMS MOBILE
+          </div>
+          <h1 class="start-title">Monitor de Fadiga Veicular</h1>
+          <p class="start-desc">
+            Detecção biométrica em tempo real de sonolência, micro-sono, bocejo e cochilo com cabeça baixa diretamente no seu smartphone.
+          </p>
+          <div class="features-pill-row">
+            <span class="feature-pill">⚡ Aceleração GPU</span>
+            <span class="feature-pill">📳 Vibração Háptica</span>
+            <span class="feature-pill">🔒 100% Offline / Privado</span>
+          </div>
+          <button id="btn-start" class="btn-primary" type="button">
+            <span class="btn-icon">▶</span> ATIVAR CÂMERA & MONITOR
+          </button>
+          <p class="start-subnote">Nenhuma imagem sai do seu dispositivo. Todo o processamento ocorre localmente.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Barra de Cabeçalho Superior do HUD -->
+    <header class="hud-header">
+      <div class="header-left">
+        <div class="logo-group">
+          <span class="pulse-indicator"></span>
+          <span class="logo-text">DRIVERGUARD</span>
+          <span class="logo-sub">DMS</span>
+        </div>
+      </div>
+      <div class="header-center">
+        <!-- Banner Central de Estado -->
+        <div id="status-banner" class="status-banner state-attentive">
+          <span id="status-title" class="status-title">MOTORISTA ATENTO</span>
+          <span id="status-sub" class="status-sub">Monitoramento normal ativo</span>
+        </div>
+      </div>
+      <div class="header-right">
+        <span id="fps-counter" class="fps-tag">FPS: --</span>
+      </div>
+    </header>
+
+    <!-- Painel Lateral de Telemetria Biometria (Retrátil) -->
+    <aside id="telemetry-panel" class="telemetry-card">
+      <div class="telemetry-header">
+        <span class="telemetry-title">TELEMETRIA BIOMÉTRICA</span>
+        <button id="btn-toggle-telemetry" class="btn-mini" title="Ocultar Painel">✕</button>
+      </div>
+
+      <div class="metric-row">
+        <div class="metric-info">
+          <span class="metric-label">EAR (Olhos)</span>
+          <span id="val-ear" class="metric-value">0.00</span>
+        </div>
+        <div class="meter-bar"><div id="meter-ear" class="meter-fill fill-ok" style="width: 70%"></div></div>
+      </div>
+
+      <div class="metric-row">
+        <div class="metric-info">
+          <span class="metric-label">MAR (Boca)</span>
+          <span id="val-mar" class="metric-value">0.00</span>
+        </div>
+        <div class="meter-bar"><div id="meter-mar" class="meter-fill fill-accent" style="width: 25%"></div></div>
+      </div>
+
+      <div class="metric-row">
+        <div class="metric-info">
+          <span class="metric-label">Cabeça (Pitch / Yaw)</span>
+          <span id="val-head" class="metric-value">0° / 0°</span>
+        </div>
+        <div class="meter-bar"><div id="meter-pitch" class="meter-fill fill-accent" style="width: 50%"></div></div>
+      </div>
+
+      <div class="metric-divider"></div>
+
+      <div class="metric-row">
+        <div class="metric-info">
+          <span class="metric-label font-bold">ÍNDICE DE FADIGA</span>
+          <span id="val-fatigue" class="metric-value font-bold">0%</span>
+        </div>
+        <div class="meter-bar meter-thick"><div id="meter-fatigue" class="meter-fill fill-ok" style="width: 0%"></div></div>
+      </div>
+
+      <div class="counters-grid">
+        <div class="counter-box">
+          <span class="counter-num" id="cnt-blinks">0</span>
+          <span class="counter-lbl">Piscadas</span>
+        </div>
+        <div class="counter-box">
+          <span class="counter-num" id="cnt-yawns">0</span>
+          <span class="counter-lbl">Bocejos</span>
+        </div>
+        <div class="counter-box counter-alert">
+          <span class="counter-num" id="cnt-drowsy">0</span>
+          <span class="counter-lbl">Eventos Sono</span>
+        </div>
+      </div>
+    </aside>
+
+    <!-- Barra Inferior de Controles Móveis (Touch Bar) -->
+    <nav class="hud-dock">
+      <button id="btn-calibrate" class="dock-btn" type="button" title="Calibrar Rosto (3s)">
+        <span class="dock-icon">🎯</span>
+        <span class="dock-text">Calibrar</span>
+      </button>
+
+      <button id="btn-camera-flip" class="dock-btn" type="button" title="Alternar Câmera Frontal/Traseira">
+        <span class="dock-icon">🔄</span>
+        <span class="dock-text">Câmera</span>
+      </button>
+
+      <button id="btn-mute" class="dock-btn" type="button" title="Silenciar Alarme">
+        <span id="mute-icon" class="dock-icon">🔔</span>
+        <span id="mute-text" class="dock-text">Áudio ON</span>
+      </button>
+
+      <button id="btn-haptic" class="dock-btn active" type="button" title="Vibração no Celular">
+        <span id="haptic-icon" class="dock-icon">📳</span>
+        <span class="dock-text">Vibração</span>
+      </button>
+
+      <button id="btn-toggle-panel" class="dock-btn" type="button" title="Mostrar/Ocultar Dados">
+        <span class="dock-icon">📊</span>
+        <span class="dock-text">Dados</span>
+      </button>
+    </nav>
+  </div>
+
+  <!-- Script do MediaPipe Tasks Vision Web via CDN Oficial do Google -->
+  <script type="module" src="app.js"></script>
+</body>
+</html>

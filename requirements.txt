@@ -1,0 +1,7 @@
+# DriverGuard DMS - Reconhecimento Facial de Sono e Fadiga Veicular
+# Dependências do projeto (OpenCV, MediaPipe, NumPy, SciPy)
+
+opencv-python>=4.8.0
+mediapipe>=0.10.0
+numpy>=1.24.0
+scipy>=1.10.0
